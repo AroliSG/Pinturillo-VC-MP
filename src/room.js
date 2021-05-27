@@ -1,5 +1,5 @@
 const user = require("./user.js");
-
+const words = require('./words.js');
 class room
 {
     roomID = -1;
@@ -7,20 +7,30 @@ class room
     Key = null;
     Members = null;
     Kicks = null;
+    Language = 0; 
+    /*
+    Languages:
+    0 > English
+    1 > Spanish
+    2 > Portuguese
+    */
     
     Draftsman = null;
+    draftsPosition = null;
 
     Word = null;
     Seconds = null; //Secs
     defaultSecs = 60;
 
     /*Type = Private or Public */
-    constructor( id, owner, type, seconds )
+    constructor( id, owner, type, seconds, lang )
     {
         roomID = id;
         Owner = owner.getName();
         ( type == 1 ?  Key = generateKey() : Key = "public" );
         defaultSecs = seconds;
+
+        Language = lang;
         /*
         Members = user class;
         Kicks = save player UID.
@@ -29,9 +39,9 @@ class room
         Members = new Map([iterable]);
         Kicks = new Map([iterable]);
 
-        Members.set(owner.getId(), user(owner, roomID))
+        Members.set(owner.getId(), user(owner, roomID, Members.length ))
 
-        function onMessage(player, message)
+        onMessage = function(player, message)
         {
             var user = Members.get(owner.getId());
             if ( user.wordAcerted == true )
@@ -48,22 +58,19 @@ class room
             else console.log("[ROOM-"+roomID+"] [GLOBAl-ROOM-CHAT]" + player.getName() + ": " + message);
         }
     
-        function addMember(player)
+        addMember = function(player)
         {
             if ( Kicks.get(player.getUID()) ) return "pa su casa";
             else Members.set(player.getId(), user(player, this.roomID));
         }
     
-        function delMember(player)
+        delMember = function(player)
         {
             Members.delete(player.getId());
         }
     }
 
 
-    /*
-    Static = functions used by this class (private function)
-    */
     static kickMember(player)
     {
         Kicks.set(player.getUID(), true);
@@ -72,8 +79,25 @@ class room
     
     static generateKey() {
         var result = [], characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', charactersLength = characters.length;
-        for ( var i = 0; i < 6; i++ ) result.push(characters.charAt(Math.floor(Math.random() *  charactersLength)));
+        for ( var i = 0; i < 6; i++ ) result.push(characters.charAt(Math.floor(Math.random() *  charactersLength) ));
         return result.join('');
+    }
+
+    static getRandomWords(amount)
+    {
+        var wrds = words.english;
+        if ( Language == 1 )  wrds = words.spanish
+        else if ( Language == 2 ) wrds = words.portuguese_words;
+
+        var list = [];
+
+        for(var i = 0; i < amount; i++)
+        {
+            var random = Math.floor(Math.random() *  wrds.length );
+            list.push(wrds[random]);
+            wrds.remove(random);
+        }
+        return list;
     }
 
 }

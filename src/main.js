@@ -1,6 +1,6 @@
 
-const words = require('./room.js');
-const classes = require('./words.js');
+const room = require('./room.js');
+const words = require('./words.js');
 
 var rooms = [];
 
