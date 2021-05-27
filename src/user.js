@@ -6,10 +6,11 @@ class user
     voteKick = -1;
     drawed = null;
     userName = null;
+    Position = -1;
 
     wordAcerted = null;
 
-    constructor(player, room)
+    constructor(player, room, pos)
     {
         ID = player.getId();
         userName = player.getName();
@@ -19,6 +20,7 @@ class user
         wordAcerted = false;
         voteKick = 0;
         Points = 0;
+        Position = pos;
     }
 }
 
