@@ -8,13 +8,17 @@ class Quickdraw extends Component {
     align = null
     RelativeSize = null;
     border = null;
+    onBrushMove = null;
+    draw = null;
 
     constructor(o) {
         this.id = o.id; 
+        this.draw = [];
 
         if (o.rawin ( "align")) this.align = o.align;
         else this.align = "center";
-        
+
+        if (o.rawin ("onBrushMove")) this.onBrushMove = o.onBrushMove;
         if (o.rawin ( "border")) this.border = o.border;
 
         if (o.rawin ("RelativeSize")) this.RelativeSize = o.RelativeSize;
@@ -58,7 +62,7 @@ class Quickdraw extends Component {
             local mouse = GUI.GetMousePos ();
             if (mouse != null) { 
                 local random = "b" + GUI.GetMousePos().X;
-                    if  (UI.Canvas (random) != null) random = "brush" + randomId (15,1);
+                    if  (UI.Canvas (random) != null) random = "brush" + randomId (15,1).tostring ();
                     b = UI.Canvas({
                         id= random,
                         context = context,
@@ -73,7 +77,8 @@ class Quickdraw extends Component {
                             context.detachFromMouse ();
                         }
                     });
-                    
+                    //context.draw.push ({Name = random, Pos = mouse});
+                    if (context.onBrushMove != null) context.onBrushMove (mouse.X,mouse.Y, random, context.id);
                     
                     b.Pos.X = mouse.X-wrapper.Pos.X; 
                     if (b.Pos.X <= 0) b.Pos.X = 0;
