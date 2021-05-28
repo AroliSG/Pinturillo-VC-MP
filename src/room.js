@@ -1,6 +1,31 @@
 const user = require("./user.js");
-const words = require('./words.js');
-class room
+const words = require('./words.json');
+
+class General {
+    constructor () {
+    }
+
+    start = function (lang) {
+        let drawer, index = server.getAllPlayers().length;
+        if (index >= 2) drawer = server.getPlayer (Math.floor(Math.random() * index));
+        
+        return this.getRandomWords (lang) + "," + drawer;
+    }
+
+    getRandomWords = function (lang)
+    {
+        let words_list = words [lang];
+        let catalogue = [];
+        for(var i = 0; i < 3; i++)
+        {
+            var random = Math.floor(Math.random() * words_list.length);
+            catalogue.push(words_list [random]);
+        }
+        return catalogue;
+    }
+}
+
+class individual extends General
 {
     roomID = -1;
     Owner = null;
@@ -82,26 +107,7 @@ class room
         for ( var i = 0; i < 6; i++ ) result.push(characters.charAt(Math.floor(Math.random() *  charactersLength) ));
         return result.join('');
     }
-
-    static getRandomWords(amount)
-    {
-        var wrds = words.english;
-        if ( Language == 1 )  wrds = words.spanish
-        else if ( Language == 2 ) wrds = words.portuguese_words;
-
-        var list = [];
-
-        for(var i = 0; i < amount; i++)
-        {
-            var random = Math.floor(Math.random() *  wrds.length );
-            list.push(wrds[random]);
-            wrds.remove(random);
-        }
-        return list;
-    }
-
 }
 
-
-
-module.exports = room;
+ 
+module.exports = {general: new General};
