@@ -1,25 +1,15 @@
 
-const room = require('./room.js');
-const words = require('./words.js');
-
-var rooms = [];
+const rooms = require('./room.js');
 
 function onServerLoadScripts() {
-    
-
 }
-
-
 
 function onServerInitialise() {
     server.setServerName ( "Pinturillo - Draw and Play" );
-    server.setGameModeText ( "JavaScript - DP" );
+    server.setGameModeText ( "JavaScript 0.1" );
     
-    
-
+    server.setOption(VCMP.Server.Option.AutoJoinMessages, false);
 }
-
-
 
 function onServerUnloadScripts() {
 
@@ -39,11 +29,50 @@ function onPlayerSpawn(player) {
 function onPlayerConnect(player) {
     player.setName ("Player" + player.getId ());
     server.sendClientMessageToAll (`Player ${[player.getId ()]} joined the server.`);
+   
+    // adding player to tab list
+    server.getAllPlayers().forEach(p => {
+        let pList;
+        server.getAllPlayers().forEach(p => {
+            if (pList) pList +=  "," + p.getId ();
+            else pList = ""+p.getId ();
+        })
+        dataToClient (p, pList, 1);
+    })
 }
 
 
 function onPlayerDisconnect(player, reason) {
+    server.getAllPlayers().forEach(p => {
+        // deleting player from tab list
+        let pList;
+        server.getAllPlayers().forEach(p => {
+            if (pList) pList +=  "," + p.getId ();
+            else pList = ""+p.getId ();
+        });
+        dataToClient (p, pList, 1);
+    });
+}
 
+
+function onClientScriptData(player, stream) {
+    let string = stream.readString(), integer = stream.readInt(); 
+    switch (integer) {
+        // drawing on guesser screen.
+        case 1: {
+            server.getAllPlayers().forEach(p => {
+                if (p.getId () != player.getId ()) dataToClient (p, string, 2);
+            });
+        }
+        break;
+
+        // words to screen for the drawer
+        case 2: {
+            let replyback = rooms.general.start (string);
+            dataToClient (player, replyback, 3);
+        }
+        break;
+    }
 }
 
 
@@ -223,29 +252,6 @@ function onPlayerModuleList(player, list) {
 
 
 
-function onClientScriptData(player, stream) {
-
-
-    /*
-     //reading a stream from the client
-    
-     console.log(stream.readString());
-     console.log(stream.readFloat());
-     console.log(stream.readInt());
-     console.log(stream.readByte());
-     
-     
-     //building a stream and sending it to the client
-    
-     const stream = new VCMPStream();
-     stream.writeString("lalaya");
-     stream.writeFloat(5.9);
-     stream.writeInt(51);
-     stream.writeByte(3);
-     stream.send(player);
-     */
-
-}
 
 
 
@@ -284,3 +290,17 @@ function onIncomingConnection(name, password, ip) {
  
  }
  */
+
+function dataToClient (p, ...args )
+{
+    const stream = new VCMPStream();   
+    args.forEach(data => {
+        switch(typeof data)
+        {
+            case "string": stream.writeString (data); break;
+            case "number": stream.writeInt (data); break;
+        }
+    })
+    stream.send(p);
+}
+
